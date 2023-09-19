@@ -1,0 +1,29 @@
+---
+- name: Deploy web application
+  hosts: nginx
+  become: yes
+  become_user: root
+  tasks:
+    - name: Create work folder
+      file:
+        path: /app
+        state: directory
+
+    - name: Copy project
+      copy:
+        src: ../app
+        dest: /app
+      notify: Restart project
+
+    - name: Ensure Docker Compose is installed
+      apt:
+        name: docker-compose
+        state: present
+
+    - name: Start Docker Compose
+      command: docker-compose up -d
+      args:
+        chdir: /app/docker/
+
+    - name: Restart project
+      command: docker compose restart

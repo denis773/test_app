@@ -1,0 +1,31 @@
+services:
+
+  php:
+    build:
+      context: ./php
+    volumes:
+      - ./php/app.ini:/usr/local/etc/php/conf.d/app.ini:ro
+      - ../src:/app
+    depends_on:
+      - mysql
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - 8080:80
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../src/public:/app:ro
+    depends_on:
+      - php
+
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_RANDOM_ROOT_PASSWORD: ${MYSQL_RANDOM_ROOT_PASSWORD}
+    volumes:
+      - ./mysql/app.cfg:/etc/mysql/conf.d/app.cfg:ro
+      - ./mysql/data:/var/lib/mysql

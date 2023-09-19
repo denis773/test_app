@@ -1,0 +1,40 @@
+user  nginx;
+worker_processes  1;
+
+error_log  /var/log/nginx/error.log warn;
+pid        /var/run/nginx.pid;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    server {
+        listen  80;
+        server_name  localhost;
+
+        location / {
+            root   /var/www/html;
+            index  index.php;
+        }
+
+        location /webapp {
+            proxy_pass http://webapp;
+        }
+
+        location ~ \.php$ {
+            fastcgi_pass   php:9000;
+            fastcgi_index  index.php;
+            fastcgi_param  SCRIPT_FILENAME  /var/www/html$fastcgi_script_name;
+            include        fastcgi_params;
+        }
+    }
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+}
